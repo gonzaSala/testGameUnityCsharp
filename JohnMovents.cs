@@ -1,9 +1,12 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.SceneManagement;
+
 
 public class JohnMovents : MonoBehaviour
 {
+    public GameOverScreen gameOverScreen;
     public GameObject BulletPrefab;
     public float Speed;
     public AudioClip deathJohn;
@@ -11,15 +14,21 @@ public class JohnMovents : MonoBehaviour
     private Rigidbody2D Rigidbody2D;
     private float Horizontal;
     private Animator Animator;
-
+    private Vector3 initialPosition;
     private bool Grounded;
     private float LastShoot;
     private int Health = 5;
     public static bool IsAlive { get; private set; } = true;
-     void Start()
+    void Start()
     {
         Rigidbody2D = GetComponent<Rigidbody2D>();
         Animator = GetComponent<Animator>();
+        initialPosition = transform.position;
+
+        
+
+        Debug.Log("Initial Position: " + initialPosition);
+        Debug.Log("JohnMovents Start called");
     }
 
     void Update()
@@ -72,7 +81,7 @@ public class JohnMovents : MonoBehaviour
 
     private void FixedUpdate()
     {
-        if (IsAlive)
+        if (IsAlive && Time.timeScale > 0f)
         {
             Rigidbody2D.velocity = new Vector2(Horizontal, Rigidbody2D.velocity.y);
         }
@@ -88,11 +97,34 @@ public class JohnMovents : MonoBehaviour
             HandleDeath();
             Camera.main.GetComponent<AudioSource>().PlayOneShot(deathJohn);
 
+             Debug.Log("HandleDeath called");
+
         }
     }
 
     private void HandleDeath()
     {
         Animator.SetBool("deathJohn", Health <= 0);
+        gameOverScreen.ShowGameOverScreen();
+    }
+
+    public void RestartGame()
+    {
+        Health = 5;
+        IsAlive = true;
+        transform.position = initialPosition;  
+        SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
+
+        Debug.Log("RestartGame called");
+    }
+
+    public void GoToMainMenu()
+    {
+        Health = 5;
+        IsAlive = true;
+        transform.position = initialPosition;  
+        SceneManager.LoadScene("MainMenu");
+
+        Debug.Log("GoToMainMenu called");
     }
 }
